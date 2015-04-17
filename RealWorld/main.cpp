@@ -23,12 +23,6 @@ GLFWwindow* window;
 #include <glm/gtc/matrix_transform.hpp>
 using namespace glm;
 
-// Global vars
-glm::mat4 View;
-glm::vec3 cam_pos(4, 4, 4);
-glm::vec3 look_at(0, 0, 0);
-glm::vec3 world_up(0, 1, 0);
-
 
 bool loadOBJ(
 	const char * path,

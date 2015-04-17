@@ -25,6 +25,9 @@
     <ClCompile Include="GLApplication.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TerrainApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="vertex.shader">
@@ -39,6 +42,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GLApplication.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -82,6 +82,7 @@
   <ItemGroup>
     <ClCompile Include="GLApplication.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="TerrainApp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment.shader" />
@@ -90,6 +91,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GLApplication.h" />
+    <ClInclude Include="TerrainApp.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

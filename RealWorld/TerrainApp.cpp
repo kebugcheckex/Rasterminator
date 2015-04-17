@@ -1,5 +1,4 @@
 #include "TerrainApp.h"
-#include <GL/glew.h>
 
 TerrainApp::TerrainApp(int width, int height)
 	: GLApplication(width, height)
@@ -8,12 +7,17 @@ TerrainApp::TerrainApp(int width, int height)
 
 TerrainApp::~TerrainApp()
 {
+	glDeleteBuffers(1, &vertexbuffer);
+	glDeleteBuffers(1, &uvbuffer);
+	glDeleteProgram(program_id);
+	glDeleteVertexArrays(1, &varray_id);
+	glfwTerminate();
 }
 
 void TerrainApp::RenderLoop()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	mouse_move();
+	//mouse_move();
 
 	glUseProgram(program_id);
 	mvpmat_ = projmat_ * viewmat_ * modelmat_;
@@ -24,10 +28,10 @@ void TerrainApp::RenderLoop()
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
-	glUniform1i(TextureID, 0);
+	glUniform1i(texture_id, 0);
 
 	glm::vec3 lightPos = glm::vec3(4, 4, 4);
-	glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
+	glUniform3f(light_id, lightPos.x, lightPos.y, lightPos.z);
 
 	// 1rst attribute buffer : vertices
 	glEnableVertexAttribArray(0);
@@ -66,13 +70,13 @@ void TerrainApp::RenderLoop()
 		);
 
 	// Draw the triangles !
-	glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+	glDrawArrays(GL_TRIANGLES, 0, vertexList.size());
 
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(2);
 
 	// Swap buffers
-	glfwSwapBuffers(window);
+	glfwSwapBuffers(window_);
 	glfwPollEvents();
 }

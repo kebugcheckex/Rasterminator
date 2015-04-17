@@ -1,15 +1,15 @@
-#include "GLApplication.h"
-
 #include <fstream>
 #include <iostream>
 #include <vector>
-
-#include <GL/glew.h>
 #include <glm/gtc/matrix_transform.hpp>
+
+#include "GLApplication.h"
 
 GLApplication::GLApplication(int xres, int yres)
 	: APP_NAME("Rasterminator")
 {
+	xres_ = xres;
+	yres_ = yres;
 	fov_ = 45.0f;
 	
 	modelmat_ = glm::mat4(1.0f);
@@ -22,9 +22,6 @@ GLApplication::GLApplication(int xres, int yres)
 	projmat_ = glm::perspective(fov_, 4.0f / 3.0f, 0.1f, 100.0f);
 
 }
-
-GLApplication::~GLApplication()
-{}
 
 bool GLApplication::Init()
 {
@@ -43,6 +40,16 @@ bool GLApplication::Init()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+	window_ = glfwCreateWindow(xres_, yres_, APP_NAME.c_str(), NULL, NULL);
+	if (!window_)
+	{
+		std::cerr << "Failed to create a window!\n";
+		glfwTerminate();
+		return false;
+	}
+	glfwMakeContextCurrent(window_);
+	glfwSetInputMode(window_, GLFW_STICKY_KEYS, GL_TRUE);
+	glfwSetKeyCallback(window_, GLApplication::key_callback);
 	// Initialize GLEW
 	glewExperimental = GL_TRUE;
 	if (glewInit() != GLEW_OK)
@@ -51,8 +58,7 @@ bool GLApplication::Init()
 		return false;
 	}
 
-	glfwSetInputMode(window_, GLFW_STICKY_KEYS, GL_TRUE);
-	glfwSetKeyCallback(window_, GLApplication::key_callback);
+	
 
 	// TODO set mouse scroll call back
 
@@ -62,16 +68,10 @@ bool GLApplication::Init()
 	glEnable(GL_CULL_FACE);
 	glDepthFunc(GL_LESS);
 
-	/* Window is created at last */
-	// Create the window
-	window_ = glfwCreateWindow(xres_, yres_, APP_NAME.c_str(), NULL, NULL);
-	if (!window_)
-	{
-		std::cerr << "Failed to create a window!\n";
-		glfwTerminate();
-		return false;
-	}
-	glfwMakeContextCurrent(window_);
+	// Not quite sure whether the following two lines should be placed here
+	glGenVertexArrays(1, &varray_id);
+	glBindVertexArray(varray_id);
+	return true;
 }
 
 /*
@@ -105,6 +105,8 @@ bool GLApplication::InitShaders()
 	glDeleteShader(vertex_shader_id);
 	glDeleteShader(fragment_shader_id);
 
+	matrix_id = glGetUniformLocation(program_id, "MVP");
+	light_id = glGetUniformLocation(program_id, "LightPosition_worldspace");
 	return true;
 }
 
@@ -119,8 +121,27 @@ bool GLApplication::LoadTexture(const char *filename)
 bool GLApplication::LoadObject(const char *filename)
 {
 	if (!load_object(filename)) return false;
+	glGenBuffers(1, &vertexbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glBufferData(GL_ARRAY_BUFFER, vertexList.size() * sizeof(glm::vec3), &vertexList[0], GL_STATIC_DRAW);
+
+	glGenBuffers(1, &uvbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	glBufferData(GL_ARRAY_BUFFER, uvList.size() * sizeof(glm::vec2), &uvList[0], GL_STATIC_DRAW);
+
+	glGenBuffers(1, &normalbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
+	glBufferData(GL_ARRAY_BUFFER, normalList.size() * sizeof(glm::vec3), &normalList[0], GL_STATIC_DRAW);
+	return true;
 }
 
+void GLApplication::RunRender()
+{
+	while (!glfwWindowShouldClose(window_))
+	{
+		RenderLoop();
+	}
+}
 GLuint GLApplication::load_shader(const char *filename, GLenum shader_type)
 {
 	std::string source_code;
@@ -286,4 +307,9 @@ bool GLApplication::load_object(const char *filename)
 		normalList.push_back(normal);
 	}
 	return true;
+}
+
+void GLApplication::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+
 }

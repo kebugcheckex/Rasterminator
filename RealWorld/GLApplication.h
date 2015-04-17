@@ -1,18 +1,20 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <GL/glew.h>
 #include <GL/glfw3.h>
 #include <glm/glm.hpp>
 class GLApplication
 {
 public:
 	GLApplication(int xres, int yres);
+	virtual ~GLApplication() {};
 	bool Init();
 	bool InitShaders();
 	bool LoadTexture(const char *filename);
 	bool LoadObject(const char *filename);
-	//virtual ~GLApplication();
-	virtual void OnKey(int key);
+	void RunRender();
+	//virtual void OnKey(int key);
 	virtual void RenderLoop() = 0;
 
 	const std::string APP_NAME;
@@ -35,11 +37,16 @@ protected:
 	std::vector<glm::vec3> normalList;
 	std::vector<glm::vec2> uvList;
 
+	GLuint varray_id;
 	GLuint program_id;
 	GLuint matrix_id;
+	GLuint light_id;
 	GLuint texture;
 	GLuint texture_id;
 
+	GLuint vertexbuffer;
+	GLuint uvbuffer;
+	GLuint normalbuffer;
 	// Helper functions
 	GLuint load_shader(const char *filename, GLenum shader_type);
 	GLuint load_texture(const char *filename);

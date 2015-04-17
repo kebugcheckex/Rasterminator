@@ -1,0 +1,6 @@
+Compiling shader : vertex.shader
+Compiling geometry shader
+Compiling shader : fragment.shader
+Linking program
+Loading texture file wood.ppm
+Loading OBJ file cow.obj...

@@ -5,6 +5,10 @@
 
 #include "GLApplication.h"
 
+#define FOURCC_DXT1 0x31545844 // Equivalent to "DXT1" in ASCII
+#define FOURCC_DXT3 0x33545844 // Equivalent to "DXT3" in ASCII
+#define FOURCC_DXT5 0x35545844 // Equivalent to "DXT5" in ASCII
+
 GLApplication::GLApplication(int xres, int yres)
 	: APP_NAME("Rasterminator")
 {
@@ -18,23 +22,27 @@ GLApplication::GLApplication(int xres, int yres)
 	look_at_ = glm::vec3(0.0f, 0.0f, 0.0f);
 	world_up_ = glm::vec3(0.0f, 1.0f, 0.0f);
 	viewmat_ = glm::lookAt(camera_pos_, look_at_, world_up_);
-
 	projmat_ = glm::perspective(fov_, 4.0f / 3.0f, 0.1f, 100.0f);
 
 }
 
+GLApplication::~GLApplication()
+{
+	glDeleteBuffers(1, &vertexbuffer);
+	glDeleteBuffers(1, &uvbuffer);
+	glDeleteProgram(program_id);
+	glDeleteVertexArrays(1, &varray_id);
+	glfwTerminate();
+}
+
 bool GLApplication::Init()
 {
-#ifdef _DEBUG
-	std::cout << "GLApplication is initializing...\n";
-#endif /* _DEBUG */
-	// Initialize GLFW
 	if (!glfwInit())
 	{
 		std::cerr << "Failed to inintialize GLFW!\n";
 		return false;
 	}
-	// Set some window properties
+
 	glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -49,8 +57,9 @@ bool GLApplication::Init()
 	}
 	glfwMakeContextCurrent(window_);
 	glfwSetInputMode(window_, GLFW_STICKY_KEYS, GL_TRUE);
-	glfwSetKeyCallback(window_, GLApplication::key_callback);
-	// Initialize GLEW
+	glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+	glfwSetKeyCallback(window_, key_callback);
+
 	glewExperimental = GL_TRUE;
 	if (glewInit() != GLEW_OK)
 	{
@@ -58,11 +67,9 @@ bool GLApplication::Init()
 		return false;
 	}
 
-	
-
 	// TODO set mouse scroll call back
 
-	// Initialize OpenGL parameters
+
 	glClearColor(0.0f, 0.0f, 0.5f, 1.0f);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
@@ -71,13 +78,12 @@ bool GLApplication::Init()
 	// Not quite sure whether the following two lines should be placed here
 	glGenVertexArrays(1, &varray_id);
 	glBindVertexArray(varray_id);
+
+	texture_id = glGetUniformLocation(program_id, "myTextureSampler");
 	return true;
 }
 
-/*
-	Currently shader source file names are hard-coded
-	into the function.
-*/
+
 bool GLApplication::InitShaders()
 {
 	GLuint vertex_shader_id = load_shader("vertex_shader.glsl", GL_VERTEX_SHADER);
@@ -94,7 +100,8 @@ bool GLApplication::InitShaders()
 	
 	glGetProgramiv(program_id, GL_LINK_STATUS, &result);
 	glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &info_len);
-	if (info_len > 0){
+	if (info_len > 0)
+	{
 		char *message = new char[info_len + 1];
 		glGetProgramInfoLog(info_len, info_len, NULL, message);
 		std::cout << message << std::endl;
@@ -112,9 +119,17 @@ bool GLApplication::InitShaders()
 
 bool GLApplication::LoadTexture(const char *filename)
 {
-	texture = load_texture(filename);
+	std::string filestr(filename);
+	if (filestr.substr(filestr.size() - 3, 3) == "dds")
+	{
+		texture = load_dds(filename);
+	}
+	else if (filestr.substr(filestr.size() - 3, 3) == "ppm")
+	{
+		texture = load_texture(filename);
+	}
 	if (texture == 0) return false;
-	texture_id = glGetUniformLocation(program_id, "myTextureSampler");
+	
 	return true;
 }
 
@@ -142,6 +157,119 @@ void GLApplication::RunRender()
 		RenderLoop();
 	}
 }
+
+void GLApplication::RenderLoop()
+{
+	mouse_move();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUseProgram(program_id);
+	mvpmat_ = projmat_ * viewmat_ * modelmat_;
+
+	// Send our transformation to the currently bound shader, 
+	// in the "MVP" uniform
+	glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &mvpmat_[0][0]);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glUniform1i(texture_id, 0);
+
+	glm::vec3 lightPos = glm::vec3(4, 4, 4);
+	glUniform3f(light_id, lightPos.x, lightPos.y, lightPos.z);
+
+	// 1rst attribute buffer : vertices
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glVertexAttribPointer(
+		0,                  // attribute
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+		);
+
+	// 2nd attribute buffer : UVs
+	glEnableVertexAttribArray(1);
+	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	glVertexAttribPointer(
+		1,                                // attribute
+		2,                                // size
+		GL_FLOAT,                         // type
+		GL_FALSE,                         // normalized?
+		0,                                // stride
+		(void*)0                          // array buffer offset
+		);
+
+	// 3rd attribute buffer : normals
+	glEnableVertexAttribArray(2);
+	glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
+	glVertexAttribPointer(
+		2,                                // attribute
+		3,                                // size
+		GL_FLOAT,                         // type
+		GL_FALSE,                         // normalized?
+		0,                                // stride
+		(void*)0                          // array buffer offset
+		);
+
+	// Draw the triangles !
+	glDrawArrays(GL_TRIANGLES, 0, vertexList.size());
+
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(2);
+
+	// Swap buffers
+	glfwSwapBuffers(window_);
+	glfwPollEvents();
+}
+
+/*
+	Key control definitions:
+	W	- move camera forward
+	S	- move camera backward
+	A	- move camera to the left
+	D	- move camera to the right
+	UP	- move camera upward
+	DN	- move camera downward
+*/
+void GLApplication::OnKey(int key)
+{
+	glm::vec3 cam_dir = look_at_ - camera_pos_;
+	cam_dir = glm::normalize(cam_dir);
+	glm::vec3 cam_left = glm::cross(world_up_, cam_dir);
+	cam_left = glm::normalize(cam_left);
+	switch (key)
+	{
+	case GLFW_KEY_A:
+		camera_pos_ += cam_left * 0.2f;
+		look_at_ += cam_left * 0.2f;
+		break;
+	case GLFW_KEY_D:
+		camera_pos_ -= cam_left * 0.2f;
+		look_at_ -= cam_left * 0.2f;
+		break;
+	case GLFW_KEY_W:
+		camera_pos_ += cam_dir * 0.2f;
+		break;
+	case GLFW_KEY_S:
+		camera_pos_ -= cam_dir * 0.2f;
+		break;
+	case GLFW_KEY_UP:
+		camera_pos_ += world_up_ * 0.2f;
+		look_at_ += world_up_ * 0.2f;
+		break;
+	case GLFW_KEY_DOWN:
+		camera_pos_ -= world_up_ * 0.2f;
+		look_at_ -= world_up_ * 0.2f;
+		break;
+	default:
+		break;
+	}
+	mvpmat_ = projmat_ * viewmat_ * modelmat_;
+}
+
 GLuint GLApplication::load_shader(const char *filename, GLenum shader_type)
 {
 	std::string source_code;
@@ -267,7 +395,8 @@ bool GLApplication::load_object(const char *filename)
 			std::string vertex1, vertex2, vertex3;
 			unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
 			int matches = fscanf(file, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2]);
-			if (matches != 9){
+			if (matches != 9)
+			{
 				printf("File can't be read by our simple parser :-( Try exporting with other options\n");
 				return false;
 			}
@@ -309,7 +438,110 @@ bool GLApplication::load_object(const char *filename)
 	return true;
 }
 
-void GLApplication::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+GLuint GLApplication::load_dds(const char *filename)
 {
+	unsigned char header[124];
+	FILE *fp = fopen(filename, "rb");
+	if (fp == NULL)
+	{
+		std::cout << "Failed to load dds file: " << filename << std::endl;
+		return 0;
+	}
 
+	char filecode[4];
+	fread(filecode, 1, 4, fp);
+	if (strncmp(filecode, "DDS ", 4) != 0)
+	{
+		fclose(fp);
+		return 0;
+	}
+
+	fread(&header, 124, 1, fp);
+	unsigned int height = *(unsigned int*)&(header[8]);
+	unsigned int width = *(unsigned int*)&(header[12]);
+	unsigned int linearSize = *(unsigned int*)&(header[16]);
+	unsigned int mipMapCount = *(unsigned int*)&(header[24]);
+	unsigned int fourCC = *(unsigned int*)&(header[80]);
+
+	unsigned char * buffer;
+	unsigned int bufsize;
+	/* how big is it going to be including all mipmaps? */
+	bufsize = mipMapCount > 1 ? linearSize * 2 : linearSize;
+	buffer = (unsigned char*)malloc(bufsize * sizeof(unsigned char));
+	fread(buffer, 1, bufsize, fp);
+	fclose(fp);
+
+	unsigned int components = (fourCC == FOURCC_DXT1) ? 3 : 4;
+	unsigned int format;
+	switch (fourCC)
+	{
+	case FOURCC_DXT1:
+		format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+		break;
+	case FOURCC_DXT3:
+		format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+		break;
+	case FOURCC_DXT5:
+		format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+		break;
+	default:
+		free(buffer);
+		return 0;
+	}
+
+	// Create one OpenGL texture
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+
+	// "Bind" the newly created texture : all future texture functions will modify this texture
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	unsigned int blockSize = (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) ? 8 : 16;
+	unsigned int offset = 0;
+
+	/* load the mipmaps */
+	for (unsigned int level = 0; level < mipMapCount && (width || height); ++level)
+	{
+		unsigned int size = ((width + 3) / 4)*((height + 3) / 4)*blockSize;
+		glCompressedTexImage2D(GL_TEXTURE_2D, level, format, width, height,
+			0, size, buffer + offset);
+		offset += size;
+		width /= 2;
+		height /= 2;
+		// Deal with Non-Power-Of-Two textures. This code is not included in the webpage to reduce clutter.
+		if (width < 1) width = 1;
+		if (height < 1) height = 1;
+
+	}
+	free(buffer);
+	return textureID;
+}
+
+/*
+	Mouse move 
+*/
+void GLApplication::mouse_move()
+{
+	float cx = xres_ / 2;
+	float cy = yres_ / 2;
+	double cx_now, cy_now;
+	glm::vec3 cam_dir = look_at_ - camera_pos_;
+	glfwGetCursorPos(window_, &cx_now, &cy_now);
+
+	float dx = cx_now - cx;
+	float dy = cy_now - cy;
+	float r = glm::length(cam_dir);
+
+	float phi = dx / (xres_ / 2) * PI / 4;
+	look_at_.x += r * sin(phi);
+	float zx = r * (1 - cos(phi));
+
+	float theta = -dy / (yres_ / 2) * PI / 4;
+	look_at_.y += r * sin(theta);
+	float zy = r * (1 - cos(theta));
+
+	look_at_.z -= zx > zy ? zx : zy;
+	viewmat_ = glm::lookAt(camera_pos_, look_at_, world_up_);
+	glfwSetCursorPos(window_, xres_ / 2, yres_ / 2);
 }

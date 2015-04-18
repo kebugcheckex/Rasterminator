@@ -4,23 +4,25 @@
 #include <GL/glew.h>
 #include <GL/glfw3.h>
 #include <glm/glm.hpp>
+
+const double PI = 3.1415926535;
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
 class GLApplication
 {
 public:
 	GLApplication(int xres, int yres);
-	virtual ~GLApplication() {};
+	~GLApplication();
 	bool Init();
 	bool InitShaders();
 	bool LoadTexture(const char *filename);
 	bool LoadObject(const char *filename);
 	void RunRender();
-	//virtual void OnKey(int key);
-	virtual void RenderLoop() = 0;
-
+	void OnKey(int key);
+	void RenderLoop();
 	const std::string APP_NAME;
+	
 protected:
-	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-
 	int xres_, yres_;
 	GLFWwindow *window_;
 	GLfloat fov_;
@@ -47,9 +49,12 @@ protected:
 	GLuint vertexbuffer;
 	GLuint uvbuffer;
 	GLuint normalbuffer;
+
 	// Helper functions
 	GLuint load_shader(const char *filename, GLenum shader_type);
 	GLuint load_texture(const char *filename);
 	bool load_object(const char *filename);
+	GLuint load_dds(const char *filename);
+	void mouse_move();
 };
 

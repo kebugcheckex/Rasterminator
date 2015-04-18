@@ -1,1 +1,255 @@
-GLApplication is initializing...
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed D
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed A
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed 	
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed W
+Main: key pressed Q

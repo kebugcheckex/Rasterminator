@@ -19,8 +19,8 @@ int main(int argc, char *argv[])
 {
 	std::string texture_filename("wood.dds");
 	std::string object_filename("teapot.object");
-	if (argc > 3) texture_filename = argv[2];
-	if (argc > 2) object_filename = argv[1];
+	if (argc > 2) texture_filename = argv[2];
+	if (argc > 1) object_filename = argv[1];
 	if (!app.Init()) exit(8);
 	if (!app.InitShaders()) exit(9);
 	if (!app.LoadTexture(texture_filename.c_str())) exit(10);

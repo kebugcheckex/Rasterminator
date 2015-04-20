@@ -69,6 +69,7 @@ int main()
 	GaussianRandom(size, data);
 	std::vector< std::vector<double> > filter;
 	LowPassFilter(fsize, 0.25, 10, filter);
-	std::vector< std::vector<double> > result(size, std::vector<double>(size, 0.0));
+	std::vector< std::vector<double> > result;
+	Convolution2D(data, filter, result);
 	return 0;
 }

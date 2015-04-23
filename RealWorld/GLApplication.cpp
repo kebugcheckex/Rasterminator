@@ -19,7 +19,7 @@ GLApplication::GLApplication(int xres, int yres)
 	
 	modelmat_ = glm::mat4(1.0f);
 
-	camera_pos_ = glm::vec3(4.0f, 4.0f, 4.0f);
+	camera_pos_ = glm::vec3(8.0f, 8.0f, 8.0f);
 	look_at_ = glm::vec3(0.0f, 0.0f, 0.0f);
 	world_up_ = glm::vec3(0.0f, 1.0f, 0.0f);
 	viewmat_ = glm::lookAt(camera_pos_, look_at_, world_up_);
@@ -442,7 +442,7 @@ bool GLApplication::load_object(const char *filename)
 bool GLApplication::load_terrain()
 {
 	std::vector< std::vector<double> > heightMap;
-	TerrainGenerator::DiamondSquare(heightMap, 6, 30, 0.6);
+	TerrainGenerator::DiamondSquare(heightMap, 8, 30, 0.6);
 	TerrainGenerator::GenTriangles(heightMap, vertexList, normalList, uvList);
 	return true;
 }

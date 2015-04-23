@@ -5,7 +5,7 @@
 
 #include "GLApplication.h"
 #include "TerrainGenerator.h"
-
+#define FFT
 #define FOURCC_DXT1 0x31545844 // Equivalent to "DXT1" in ASCII
 #define FOURCC_DXT3 0x33545844 // Equivalent to "DXT3" in ASCII
 #define FOURCC_DXT5 0x35545844 // Equivalent to "DXT5" in ASCII
@@ -19,7 +19,7 @@ GLApplication::GLApplication(int xres, int yres)
 	
 	modelmat_ = glm::mat4(1.0f);
 
-	camera_pos_ = glm::vec3(8.0f, 8.0f, 8.0f);
+	camera_pos_ = glm::vec3(300.0f, 10.0f, 300.0f);
 	look_at_ = glm::vec3(0.0f, 0.0f, 0.0f);
 	world_up_ = glm::vec3(0.0f, 1.0f, 0.0f);
 	viewmat_ = glm::lookAt(camera_pos_, look_at_, world_up_);
@@ -71,7 +71,7 @@ bool GLApplication::Init()
 	// TODO set mouse scroll call back
 
 
-	glClearColor(0.0f, 0.0f, 0.5f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glDepthFunc(GL_LESS);
@@ -237,6 +237,7 @@ void GLApplication::RenderLoop()
 */
 void GLApplication::OnKey(int key)
 {
+	const float speed = 0.4f;
 	glm::vec3 cam_dir = look_at_ - camera_pos_;
 	cam_dir = glm::normalize(cam_dir);
 	glm::vec3 cam_left = glm::cross(world_up_, cam_dir);
@@ -244,26 +245,26 @@ void GLApplication::OnKey(int key)
 	switch (key)
 	{
 	case GLFW_KEY_A:
-		camera_pos_ += cam_left * 0.2f;
-		look_at_ += cam_left * 0.2f;
+		camera_pos_ += cam_left * speed;
+		look_at_ += cam_left * speed;
 		break;
 	case GLFW_KEY_D:
-		camera_pos_ -= cam_left * 0.2f;
-		look_at_ -= cam_left * 0.2f;
+		camera_pos_ -= cam_left * speed;
+		look_at_ -= cam_left * speed;
 		break;
 	case GLFW_KEY_W:
-		camera_pos_ += cam_dir * 0.2f;
+		camera_pos_ += cam_dir * speed;
 		break;
 	case GLFW_KEY_S:
-		camera_pos_ -= cam_dir * 0.2f;
+		camera_pos_ -= cam_dir * speed;
 		break;
 	case GLFW_KEY_UP:
-		camera_pos_ += world_up_ * 0.2f;
-		look_at_ += world_up_ * 0.2f;
+		camera_pos_ += world_up_ * speed;
+		look_at_ += world_up_ * speed;
 		break;
 	case GLFW_KEY_DOWN:
-		camera_pos_ -= world_up_ * 0.2f;
-		look_at_ -= world_up_ * 0.2f;
+		camera_pos_ -= world_up_ * speed;
+		look_at_ -= world_up_ * speed;
 		break;
 	default:
 		break;
@@ -442,7 +443,16 @@ bool GLApplication::load_object(const char *filename)
 bool GLApplication::load_terrain()
 {
 	std::vector< std::vector<double> > heightMap;
-	TerrainGenerator::DiamondSquare(heightMap, 8, 30, 0.6);
+#ifdef FFT
+	std::vector< std::vector<double> > random;
+	TerrainGenerator::GaussianRandom(512, random);
+	std::vector< std::vector<double> > filter;
+	TerrainGenerator::LowPassFilter(64, 0.25, 10, filter);
+	TerrainGenerator::Convolution2D(random, filter, heightMap);
+#else
+	TerrainGenerator::DiamondSquare(heightMap, 10, 30, 0.6);
+#endif
+	
 	TerrainGenerator::GenTriangles(heightMap, vertexList, normalList, uvList);
 	return true;
 }

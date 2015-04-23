@@ -158,8 +158,8 @@ void TerrainGenerator::GenTriangles(std::vector< std::vector<double> >& heightMa
 	{
 		for (int j = 0; j <= steps; j++)
 		{
-			map[i][j].x = i;
-			map[i][j].z = j;
+			map[i][j].x = i - steps / 2;
+			map[i][j].z = j - steps / 2;
 			map[i][j].y = heightMap[i][j];
 		}
 	}
@@ -176,18 +176,36 @@ void TerrainGenerator::GenTriangles(std::vector< std::vector<double> >& heightMa
 		}
 	}
 	int counter = 0;
-	for (int i = 0; i < map.size(); i++)
+	for (int i = 0; i < map.size() - 1; i++)
 	{
-		for (int j = 0; j < map.size(); j++)
+		for (int j = 0; j < map.size() - 1; j++)
 		{
 			vertexList[counter] = map[i][j];
-			normalList[counter] = normals[i][j];
-			std::cout << "x=" << vertexList[counter].x << "\t"
-				<< "y=" << vertexList[counter].y << "\t"
-				<< "z=" << vertexList[counter].z << std::endl;
+			normalList[counter] = glm::normalize(normals[i][j]);
 			textureList[counter].x = rand() / (double)RAND_MAX;
 			textureList[counter].y = rand() / (double)RAND_MAX;
-			counter++;
+			vertexList[counter + 1] = map[i + 1][j];
+			normalList[counter + 1] = glm::normalize(normals[i + 1][j]);
+			textureList[counter + 1].x = rand() / (double)RAND_MAX;
+			textureList[counter + 1].y = rand() / (double)RAND_MAX;
+			vertexList[counter + 2] = map[i + 1][j + 1];
+			normalList[counter + 2] = glm::normalize(normals[i + 1][j + 1]);
+			textureList[counter + 2].x = rand() / (double)RAND_MAX;
+			textureList[counter + 2].y = rand() / (double)RAND_MAX;
+			counter += 3;
+			vertexList[counter] = map[i][j];
+			normalList[counter] = glm::normalize(normals[i][j]);
+			textureList[counter].x = rand() / (double)RAND_MAX;
+			textureList[counter].y = rand() / (double)RAND_MAX;
+			vertexList[counter + 1] = map[i + 1][j + 1];
+			normalList[counter + 1] = glm::normalize(normals[i + 1][j + 1]);
+			textureList[counter + 1].x = rand() / (double)RAND_MAX;
+			textureList[counter + 1].y = rand() / (double)RAND_MAX;
+			vertexList[counter + 2] = map[i][j + 1];
+			normalList[counter + 2] = glm::normalize(normals[i][j + 1]);
+			textureList[counter + 2].x = rand() / (double)RAND_MAX;
+			textureList[counter + 2].y = rand() / (double)RAND_MAX;
+			counter += 3;
 		}
 	}
 }

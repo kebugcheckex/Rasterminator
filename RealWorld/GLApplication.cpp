@@ -100,7 +100,7 @@ bool GLApplication::InitShaders()
 	
 	glGetProgramiv(program_id, GL_LINK_STATUS, &result);
 	glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &info_len);
-	if (info_len > 0)
+	if (info_len > 10)
 	{
 		char *message = new char[info_len + 1];
 		glGetProgramInfoLog(info_len, info_len, NULL, message);
@@ -295,7 +295,7 @@ GLuint GLApplication::load_shader(const char *filename, GLenum shader_type)
 	GLint result, info_len;
 	glGetShaderiv(shader_id, GL_COMPILE_STATUS, &result);
 	glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &info_len);
-	if (info_len > 0){
+	if (info_len > 10){
 		char *message = new char[info_len + 1];
 		glGetShaderInfoLog(shader_id, info_len, NULL, message);
 		std::cout << message << std::endl;

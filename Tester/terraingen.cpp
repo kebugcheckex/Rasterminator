@@ -3,6 +3,26 @@
 #include <random>
 #include <cmath>
 #include <vector>
+#include <glm/glm.hpp>
+
+class Triangle {
+public:
+	int x[3];
+	int y[3];
+	glm::vec3 normal;
+	//TODO: RGB
+	//TODO: color
+	Triangle() {};
+	Triangle(int i0, int j0, int i1, int j1, int i2, int j2)
+	{
+		x[0] = i0;
+		y[0] = j0;
+		x[1] = i1;
+		y[1] = j1;
+		x[2] = i2;
+		y[2] = j2;
+	}
+};
 
 void GaussianRandom(int size, std::vector< std::vector<double> >& output)
 {
@@ -61,15 +81,159 @@ void Convolution2D(std::vector< std::vector<double> >& data, std::vector< std::v
 	}
 }
 
+void DiamondSquare(std::vector< std::vector<double> >& terrainMap, int level, double terrainR, double roughness) {
+
+	std::random_device rdm;
+	std::mt19937 engine(rdm());
+	std::uniform_real_distribution<double> rnum(-1.0, 1.0);
+
+	// Define The Height Map 2D Array
+	int terrainSize = 1 << level;
+	terrainMap = std::vector< std::vector<double> >(terrainSize + 1, std::vector<double>(terrainSize + 1, 0.0));
+
+	// Initialize the Corners For Diamond Square
+	terrainMap[0][0] = rnum(engine);
+	terrainMap[0][terrainSize] = rnum(engine);
+	terrainMap[terrainSize][0] = rnum(engine);
+	terrainMap[terrainSize][terrainSize] = rnum(engine);
+
+	double range = terrainR;
+
+	// For each level;
+	for (int lev = 0; lev < level; lev++) {
+
+		int indLow = 1 << lev;
+		int indHigh = 1 << (level - lev);
+		int indMid = indHigh >> 1;
+
+		// Calculate Diamonds
+		for (int x = 0; x < terrainSize; x += indHigh) {
+			for (int y = 0; y < terrainSize; y += indHigh) {
+				if (indHigh > 1) {
+					int halfPoint = indHigh / 2;
+					terrainMap[x + halfPoint][y + halfPoint] = (terrainMap[x][y] + terrainMap[x + indHigh][y] + terrainMap[x][y + indHigh] + terrainMap[x + indHigh][y + indHigh]) / 4.0 + rnum(engine)*range;
+				}
+			}
+		}
+
+		// Calculate Squares
+		if (indMid > 0) {
+			for (int x = 0; x <= terrainSize; x += indMid) {
+				for (int y = (x + indMid) % indHigh; y <= terrainSize; y += indHigh) {
+					if (indHigh > 1) {
+						int i = x - indMid;
+						int j = y - indMid;
+						int halfPoint = indHigh / 2;
+						double meanVal = 0;
+						int numPoints = 0;
+						if (i >= 0) {
+							meanVal = meanVal + terrainMap[i][j + halfPoint];
+							numPoints++;
+						}
+						if (i + indHigh <= terrainSize) {
+							meanVal = meanVal + terrainMap[i + indHigh][j + halfPoint];
+							numPoints++;
+						}
+						if (j >= 0) {
+							meanVal = meanVal + terrainMap[i + halfPoint][j];
+							numPoints++;
+						}
+						if (j + indHigh <= terrainSize) {
+							meanVal = meanVal + terrainMap[i + halfPoint][j + indHigh];
+							numPoints++;
+						}
+						terrainMap[i + halfPoint][j + halfPoint] = meanVal / numPoints + rnum(engine)*range;
+					}
+				}
+			}
+		}
+
+		// Update Range
+		range = range*roughness;
+	}
+}
+
+void GenTriangles(std::vector< std::vector<double> >& heightMap,	// Input: height map
+	std::vector<glm::vec3>& vertexList,		// Output: vertex array, each contains x, y, z
+	std::vector<glm::vec3>& normalList,		// Output: normal array
+	std::vector<glm::vec2>& textureList)	// Output: texture indices
+{
+	int size = heightMap.size();
+	int steps = size - 1;
+	int numTriangles = steps * steps * 2;
+	vertexList = std::vector<glm::vec3>(numTriangles * 3);
+	normalList = std::vector<glm::vec3>(numTriangles * 3);
+	textureList = std::vector<glm::vec2>(numTriangles * 3);
+	std::vector<Triangle> triangles(numTriangles);
+	int tri = 0;
+	for (int i = 0; i < steps; i++)
+	{
+		for (int j = 0; j < steps; j++)
+		{
+			triangles[tri++] = Triangle(i, j, i + 1, j, i, j + 1);
+			triangles[tri++] = Triangle(i + 1, j, i + 1, j + 1, i, j + 1);
+		}
+	}
+	std::vector< std::vector<glm::vec3> > map(steps + 1, std::vector<glm::vec3>(steps + 1));
+	for (int i = 0; i <= steps; i++)
+	{
+		for (int j = 0; j <= steps; j++)
+		{
+			map[i][j].x = i;
+			map[i][j].z = j;
+			map[i][j].y = heightMap[i][j];
+		}
+	}
+	std::vector< std::vector<glm::vec3> > normals(steps + 1, std::vector<glm::vec3>(steps + 1));
+	for (int i = 0; i < numTriangles; i++)
+	{
+		glm::vec3 v0 = map[triangles[i].x[0]][triangles[i].y[0]];
+		glm::vec3 v1 = map[triangles[i].x[1]][triangles[i].y[1]];
+		glm::vec3 v2 = map[triangles[i].x[2]][triangles[i].y[2]];
+		triangles[i].normal = glm::cross(v0 - v1, v1 - v2);
+		for (int j = 0; j < 0; j++)
+		{
+			normals[triangles[i].x[j]][triangles[i].y[j]] += triangles[i].normal;
+		}
+	}
+	int counter = 0;
+	for (int i = 0; i < map.size(); i++)
+	{
+		for (int j = 0; j < map.size(); j++)
+		{
+			vertexList[counter] = map[i][j];
+			normalList[counter] = normals[i][j];
+			std::cout << "x=" << vertexList[counter].x << "\t"
+				<< "y=" << vertexList[counter].y << "\t"
+				<< "z=" << vertexList[counter].z << std::endl;
+			textureList[counter].x = rand() / (double)RAND_MAX;
+			textureList[counter].y = rand() / (double)RAND_MAX;
+			counter++;
+		}
+	}
+}
+
 int main()
 {
 	const int size = 64;
 	const int fsize = 32;
 	std::vector< std::vector<double> > data;
-	GaussianRandom(size, data);
-	std::vector< std::vector<double> > filter;
-	LowPassFilter(fsize, 0.25, 10, filter);
-	std::vector< std::vector<double> > result;
-	Convolution2D(data, filter, result);
+	DiamondSquare(data, 6, 30, 0.6);
+	std::vector<glm::vec3> vertexList;
+	std::vector<glm::vec3> normalList;
+	std::vector<glm::vec2> textureList;
+	GenTriangles(data, vertexList, normalList, textureList);
+	//std::cout << "data = [";
+	//for (int j = 0; j < data.size(); j++)
+	//{
+	//	for (int i = 0; i < data.size(); i++)
+	//	{
+	//		std::cout << data[i][j] << ", ";
+	//	}
+	//	std::cout << std::endl;
+	//}
+	//std::cout << "];\nsurf(1:" << data.size()
+	//	<< ", 1:" << data.size()
+	//	<< ", data);\n";
 	return 0;
 }

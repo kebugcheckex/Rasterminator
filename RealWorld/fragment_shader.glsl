@@ -1,4 +1,4 @@
-#version 430 core
+#version 330 core
 
 // Interpolated values from the vertex shaders
 in vec2 UV;
@@ -19,13 +19,13 @@ void main(){
 
 	// Light emission properties
 	// You probably want to put them as uniforms
-	vec3 LightColor = vec3(0.5,0.6,0.7);
-	float LightPower = 50.0f;
+	vec3 LightColor = vec3(1,1,1);
+	float LightPower = 200.0f;
 	
 	// Material properties
 	vec3 MaterialDiffuseColor = texture2D( myTextureSampler, UV ).rgb;
-	vec3 MaterialAmbientColor = vec3(1,1,1) * MaterialDiffuseColor;
-	vec3 MaterialSpecularColor = vec3(1,1,1);
+	vec3 MaterialAmbientColor = vec3(0.1,0.1,0.1) * MaterialDiffuseColor;
+	vec3 MaterialSpecularColor = vec3(0.3,0.3,0.3);
 
 	// Distance to the light
 	float distance = length( LightPosition_worldspace - Position_worldspace );
@@ -55,8 +55,7 @@ void main(){
 		// Ambient : simulates indirect lighting
 		MaterialAmbientColor +
 		// Diffuse : "color" of the object
-		MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance*distance) +
+		MaterialDiffuseColor * LightColor * LightPower * cosTheta / (distance*distance) * 5.0 +
 		// Specular : reflective highlight, like a mirror
-		MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance);
-
+		MaterialSpecularColor * LightColor * LightPower * pow(cosAlpha,5) / (distance*distance) * 2.0;
 }

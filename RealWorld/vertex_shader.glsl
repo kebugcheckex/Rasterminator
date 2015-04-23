@@ -1,4 +1,4 @@
-#version 430 core
+#version 330 core
 
 // Input vertex data, different for all executions of this shader.
 layout(location = 0) in vec3 vertexPosition_modelspace;
@@ -41,4 +41,3 @@ void main(){
 	// UV of the vertex. No special space for this one.
 	UV = vertexUV;
 }
-

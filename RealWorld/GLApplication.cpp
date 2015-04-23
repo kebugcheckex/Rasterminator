@@ -5,7 +5,10 @@
 
 #include "GLApplication.h"
 #include "TerrainGenerator.h"
+
 #define FFT
+#define TERRAIN
+
 #define FOURCC_DXT1 0x31545844 // Equivalent to "DXT1" in ASCII
 #define FOURCC_DXT3 0x33545844 // Equivalent to "DXT3" in ASCII
 #define FOURCC_DXT5 0x35545844 // Equivalent to "DXT5" in ASCII
@@ -13,17 +16,19 @@
 GLApplication::GLApplication(int xres, int yres)
 	: APP_NAME("Rasterminator")
 {
+	std::cout << "GLApplication constructor\n";
 	xres_ = xres;
 	yres_ = yres;
 	fov_ = 45.0f;
 	
 	modelmat_ = glm::mat4(1.0f);
 
-	camera_pos_ = glm::vec3(300.0f, 10.0f, 300.0f);
+	camera_pos_ = glm::vec3(20.0f, -12.0f, 20.0f);
 	look_at_ = glm::vec3(0.0f, 0.0f, 0.0f);
-	world_up_ = glm::vec3(0.0f, 1.0f, 0.0f);
+	world_up_ = glm::vec3(0.0f, -1.0f, 0.0f);
 	viewmat_ = glm::lookAt(camera_pos_, look_at_, world_up_);
 	projmat_ = glm::perspective(fov_, 4.0f / 3.0f, 0.1f, 100.0f);
+	lightPos_= glm::vec3(0, -20, 0);
 
 }
 
@@ -57,9 +62,6 @@ bool GLApplication::Init()
 		return false;
 	}
 	glfwMakeContextCurrent(window_);
-	glfwSetInputMode(window_, GLFW_STICKY_KEYS, GL_TRUE);
-	glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-	glfwSetKeyCallback(window_, key_callback);
 
 	glewExperimental = GL_TRUE;
 	if (glewInit() != GLEW_OK)
@@ -68,25 +70,27 @@ bool GLApplication::Init()
 		return false;
 	}
 
-	// TODO set mouse scroll call back
+	glfwSetInputMode(window_, GLFW_STICKY_KEYS, GL_TRUE);
+	glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+	glfwSetKeyCallback(window_, key_callback);
 
-
-	glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.2f, 1.0f);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glDepthFunc(GL_LESS);
 
+	// TODO set mouse scroll call back
+	
 	// Not quite sure whether the following two lines should be placed here
 	glGenVertexArrays(1, &varray_id);
 	glBindVertexArray(varray_id);
-
-	texture_id = glGetUniformLocation(program_id, "myTextureSampler");
 	return true;
 }
 
 
 bool GLApplication::InitShaders()
 {
+	std::cout << "Initializing shaders...\n";
 	GLuint vertex_shader_id = load_shader("vertex_shader.glsl", GL_VERTEX_SHADER);
 	if (vertex_shader_id == 0) return false;
 	GLuint fragment_shader_id = load_shader("fragment_shader.glsl", GL_FRAGMENT_SHADER);
@@ -101,7 +105,7 @@ bool GLApplication::InitShaders()
 	
 	glGetProgramiv(program_id, GL_LINK_STATUS, &result);
 	glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &info_len);
-	if (info_len > 10)
+	if (info_len > 0)
 	{
 		char *message = new char[info_len + 1];
 		glGetProgramInfoLog(info_len, info_len, NULL, message);
@@ -114,12 +118,15 @@ bool GLApplication::InitShaders()
 	glDeleteShader(fragment_shader_id);
 
 	matrix_id = glGetUniformLocation(program_id, "MVP");
+	viewmat_id = glGetUniformLocation(program_id, "V");
+	modelmat_id = glGetUniformLocation(program_id, "M");
 	light_id = glGetUniformLocation(program_id, "LightPosition_worldspace");
 	return true;
 }
 
 bool GLApplication::LoadTexture(const char *filename)
 {
+	std::cout << "Loading texture...\n";
 	std::string filestr(filename);
 	if (filestr.substr(filestr.size() - 3, 3) == "dds")
 	{
@@ -130,13 +137,18 @@ bool GLApplication::LoadTexture(const char *filename)
 		texture = load_texture(filename);
 	}
 	if (texture == 0) return false;
-	
+	texture_id = glGetUniformLocation(program_id, "myTextureSampler");
 	return true;
 }
 
 bool GLApplication::LoadObject(const char *filename)
 {
+	std::cout << "Loading object\n";
+#ifdef TERRAIN
 	if (!load_terrain()) return false;
+#else
+	if (!load_object(filename)) return false;
+#endif
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, vertexList.size() * sizeof(glm::vec3), &vertexList[0], GL_STATIC_DRAW);
@@ -153,6 +165,7 @@ bool GLApplication::LoadObject(const char *filename)
 
 void GLApplication::RunRender()
 {
+	std::cout << "Begin render!\n";
 	while (!glfwWindowShouldClose(window_))
 	{
 		RenderLoop();
@@ -170,13 +183,16 @@ void GLApplication::RenderLoop()
 	// Send our transformation to the currently bound shader, 
 	// in the "MVP" uniform
 	glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &mvpmat_[0][0]);
+	glUniformMatrix4fv(modelmat_id, 1, GL_FALSE, &modelmat_[0][0]);
+	glUniformMatrix4fv(viewmat_id, 1, GL_FALSE, &viewmat_[0][0]);
+ 
+	glUniform3f(light_id, lightPos_.x, lightPos_.y, lightPos_.z);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glUniform1i(texture_id, 0);
 
-	glm::vec3 lightPos = glm::vec3(4, 4, 4);
-	glUniform3f(light_id, lightPos.x, lightPos.y, lightPos.z);
+	
 
 	// 1rst attribute buffer : vertices
 	glEnableVertexAttribArray(0);
@@ -297,7 +313,7 @@ GLuint GLApplication::load_shader(const char *filename, GLenum shader_type)
 	GLint result, info_len;
 	glGetShaderiv(shader_id, GL_COMPILE_STATUS, &result);
 	glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &info_len);
-	if (info_len > 10){
+	if (info_len > 0){
 		char *message = new char[info_len + 1];
 		glGetShaderInfoLog(shader_id, info_len, NULL, message);
 		std::cout << message << std::endl;
@@ -445,9 +461,9 @@ bool GLApplication::load_terrain()
 	std::vector< std::vector<double> > heightMap;
 #ifdef FFT
 	std::vector< std::vector<double> > random;
-	TerrainGenerator::GaussianRandom(512, random);
+	TerrainGenerator::GaussianRandom(128, random);
 	std::vector< std::vector<double> > filter;
-	TerrainGenerator::LowPassFilter(64, 0.25, 10, filter);
+	TerrainGenerator::LowPassFilter(64, 0.4, 15, filter);
 	TerrainGenerator::Convolution2D(random, filter, heightMap);
 #else
 	TerrainGenerator::DiamondSquare(heightMap, 10, 30, 0.6);

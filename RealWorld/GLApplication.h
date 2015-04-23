@@ -34,6 +34,7 @@ protected:
 	glm::vec3 camera_pos_;
 	glm::vec3 look_at_;
 	glm::vec3 world_up_;
+	glm::vec3 lightPos_;
 
 	std::vector<glm::vec3> vertexList;
 	std::vector<glm::vec3> normalList;
@@ -42,6 +43,8 @@ protected:
 	GLuint varray_id;
 	GLuint program_id;
 	GLuint matrix_id;
+	GLuint viewmat_id;
+	GLuint modelmat_id;
 	GLuint light_id;
 	GLuint texture;
 	GLuint texture_id;

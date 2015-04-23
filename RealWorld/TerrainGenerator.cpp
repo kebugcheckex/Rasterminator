@@ -154,13 +154,14 @@ void TerrainGenerator::GenTriangles(std::vector< std::vector<double> >& heightMa
 		}
 	}
 	std::vector< std::vector<glm::vec3> > map(steps + 1, std::vector<glm::vec3>(steps + 1));
+	const double scale = 20.0f;
 	for (int i = 0; i <= steps; i++)
 	{
 		for (int j = 0; j <= steps; j++)
 		{
-			map[i][j].x = i - steps / 2;
-			map[i][j].z = j - steps / 2;
-			map[i][j].y = heightMap[i][j];
+			map[i][j].x = (i - steps / 2.0f)/(steps / 2.0f) * scale;
+			map[i][j].z = (j - steps / 2.0f) / (steps / 2.0f) * scale;
+			map[i][j].y = heightMap[i][j] * 0.1;
 		}
 	}
 	std::vector< std::vector<glm::vec3> > normals(steps + 1, std::vector<glm::vec3>(steps + 1));
@@ -169,10 +170,13 @@ void TerrainGenerator::GenTriangles(std::vector< std::vector<double> >& heightMa
 		glm::vec3 v0 = map[triangles[i].x[0]][triangles[i].y[0]];
 		glm::vec3 v1 = map[triangles[i].x[1]][triangles[i].y[1]];
 		glm::vec3 v2 = map[triangles[i].x[2]][triangles[i].y[2]];
-		triangles[i].normal = glm::cross(v0 - v1, v1 - v2);
-		for (int j = 0; j < 0; j++)
+		glm::vec3 d1 = v0 - v1;
+		glm::vec3 d2 = v1 - v2;
+		glm::vec3 n = glm::cross(v0 - v1, v1 - v2);
+		triangles[i].normal = n;
+		for (int j = 0; j < 3; j++)
 		{
-			normals[triangles[i].x[j]][triangles[i].y[j]] += triangles[i].normal;
+			normals[triangles[i].x[j]][triangles[i].y[j]] += n;
 		}
 	}
 	int counter = 0;

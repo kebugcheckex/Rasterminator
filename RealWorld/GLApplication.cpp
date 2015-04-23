@@ -4,6 +4,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "GLApplication.h"
+#include "TerrainGenerator.h"
 
 #define FOURCC_DXT1 0x31545844 // Equivalent to "DXT1" in ASCII
 #define FOURCC_DXT3 0x33545844 // Equivalent to "DXT3" in ASCII
@@ -135,7 +136,7 @@ bool GLApplication::LoadTexture(const char *filename)
 
 bool GLApplication::LoadObject(const char *filename)
 {
-	if (!load_object(filename)) return false;
+	if (!load_terrain()) return false;
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glBufferData(GL_ARRAY_BUFFER, vertexList.size() * sizeof(glm::vec3), &vertexList[0], GL_STATIC_DRAW);
@@ -438,6 +439,13 @@ bool GLApplication::load_object(const char *filename)
 	return true;
 }
 
+bool GLApplication::load_terrain()
+{
+	std::vector< std::vector<double> > heightMap;
+	TerrainGenerator::DiamondSquare(heightMap, 6, 30, 0.6);
+	TerrainGenerator::GenTriangles(heightMap, vertexList, normalList, uvList);
+	return true;
+}
 GLuint GLApplication::load_dds(const char *filename)
 {
 	unsigned char header[124];

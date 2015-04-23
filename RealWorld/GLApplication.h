@@ -54,6 +54,7 @@ protected:
 	GLuint load_shader(const char *filename, GLenum shader_type);
 	GLuint load_texture(const char *filename);
 	bool load_object(const char *filename);
+	bool load_terrain();
 	GLuint load_dds(const char *filename);
 	void mouse_move();
 };

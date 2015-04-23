@@ -84,9 +84,11 @@
   <ItemGroup>
     <ClCompile Include="GLApplication.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="TerrainGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GLApplication.h" />
+    <ClInclude Include="TerrainGenerator.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="fragment_shader.glsl" />

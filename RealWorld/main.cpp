@@ -1,9 +1,4 @@
 #include "GLApplication.h"
-#include <iostream>
-#include <random>
-
-
-
 
 GLApplication app(1024, 768);
 

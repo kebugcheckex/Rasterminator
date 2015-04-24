@@ -1,13 +1,5 @@
-#include <fstream>
-#include <iostream>
-#include <vector>
-#include <glm/gtc/matrix_transform.hpp>
-
 #include "GLApplication.h"
 #include "TerrainGenerator.h"
-
-#define FFT
-#define TERRAIN
 
 #define FOURCC_DXT1 0x31545844 // Equivalent to "DXT1" in ASCII
 #define FOURCC_DXT3 0x33545844 // Equivalent to "DXT3" in ASCII
@@ -23,13 +15,12 @@ GLApplication::GLApplication(int xres, int yres)
 	
 	modelmat_ = glm::mat4(1.0f);
 
-	camera_pos_ = glm::vec3(20.0f, -12.0f, 20.0f);
-	look_at_ = glm::vec3(0.0f, 0.0f, 0.0f);
+	camera_pos_ = glm::vec3(CAM_POS);
+	look_at_ = glm::vec3(LOOK_AT);
 	world_up_ = glm::vec3(0.0f, -1.0f, 0.0f);
 	viewmat_ = glm::lookAt(camera_pos_, look_at_, world_up_);
 	projmat_ = glm::perspective(fov_, 4.0f / 3.0f, 0.1f, 100.0f);
-	lightPos_= glm::vec3(0, -20, 0);
-
+	lightPos_= glm::vec3(LIGHT_POS);
 }
 
 GLApplication::~GLApplication()
@@ -103,7 +94,7 @@ bool GLApplication::InitShaders()
 
 	GLint result, info_len;
 	
-	glGetProgramiv(program_id, GL_LINK_STATUS, &result);
+	/*glGetProgramiv(program_id, GL_LINK_STATUS, &result);
 	glGetProgramiv(program_id, GL_INFO_LOG_LENGTH, &info_len);
 	if (info_len > 0)
 	{
@@ -112,7 +103,7 @@ bool GLApplication::InitShaders()
 		std::cout << message << std::endl;
 		delete[] message;
 		return false;
-	}
+	}*/
 
 	glDeleteShader(vertex_shader_id);
 	glDeleteShader(fragment_shader_id);
@@ -276,7 +267,7 @@ void GLApplication::OnKey(int key)
 		break;
 	case GLFW_KEY_UP:
 		camera_pos_ += world_up_ * speed;
-		look_at_ += world_up_ * speed;
+		look_at_ += world_up_ * speed;	
 		break;
 	case GLFW_KEY_DOWN:
 		camera_pos_ -= world_up_ * speed;
@@ -310,7 +301,7 @@ GLuint GLApplication::load_shader(const char *filename, GLenum shader_type)
 	glShaderSource(shader_id, 1, &source, NULL);
 	glCompileShader(shader_id);
 
-	GLint result, info_len;
+	/*GLint result, info_len;
 	glGetShaderiv(shader_id, GL_COMPILE_STATUS, &result);
 	glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &info_len);
 	if (info_len > 0){
@@ -319,7 +310,7 @@ GLuint GLApplication::load_shader(const char *filename, GLenum shader_type)
 		std::cout << message << std::endl;
 		delete[] message;
 		return 0;
-	}
+	}*/
 	return shader_id;
 }
 
@@ -461,12 +452,12 @@ bool GLApplication::load_terrain()
 	std::vector< std::vector<double> > heightMap;
 #ifdef FFT
 	std::vector< std::vector<double> > random;
-	TerrainGenerator::GaussianRandom(128, random);
+	TerrainGenerator::GaussianRandom(32, random);
 	std::vector< std::vector<double> > filter;
-	TerrainGenerator::LowPassFilter(64, 0.4, 15, filter);
+	TerrainGenerator::LowPassFilter(16, 0.4, 15, filter);
 	TerrainGenerator::Convolution2D(random, filter, heightMap);
 #else
-	TerrainGenerator::DiamondSquare(heightMap, 10, 30, 0.6);
+	TerrainGenerator::DiamondSquare(heightMap, 9, 30, 0.5);
 #endif
 	
 	TerrainGenerator::GenTriangles(heightMap, vertexList, normalList, uvList);
@@ -557,23 +548,23 @@ GLuint GLApplication::load_dds(const char *filename)
 */
 void GLApplication::mouse_move()
 {
-	float cx = xres_ / 2;
-	float cy = yres_ / 2;
+	double cx = xres_ / 2;
+	double cy = yres_ / 2;
 	double cx_now, cy_now;
 	glm::vec3 cam_dir = look_at_ - camera_pos_;
 	glfwGetCursorPos(window_, &cx_now, &cy_now);
 
-	float dx = cx_now - cx;
-	float dy = cy_now - cy;
-	float r = glm::length(cam_dir);
+	double dx = cx_now - cx;
+	double dy = cy_now - cy;
+	double r = glm::length(cam_dir);
 
-	float phi = dx / (xres_ / 2) * PI / 4;
+	double phi = dx / (xres_ / 2) * PI / 4;
 	look_at_.x += r * sin(phi);
-	float zx = r * (1 - cos(phi));
+	double zx = r * (1 - cos(phi));
 
-	float theta = -dy / (yres_ / 2) * PI / 4;
+	double theta = -dy / (yres_ / 2) * PI / 4;
 	look_at_.y += r * sin(theta);
-	float zy = r * (1 - cos(theta));
+	double zy = r * (1 - cos(theta));
 
 	look_at_.z -= zx > zy ? zx : zy;
 	viewmat_ = glm::lookAt(camera_pos_, look_at_, world_up_);

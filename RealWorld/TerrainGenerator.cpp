@@ -154,14 +154,13 @@ void TerrainGenerator::GenTriangles(std::vector< std::vector<double> >& heightMa
 		}
 	}
 	std::vector< std::vector<glm::vec3> > map(steps + 1, std::vector<glm::vec3>(steps + 1));
-	const double scale = 20.0f;
 	for (int i = 0; i <= steps; i++)
 	{
 		for (int j = 0; j <= steps; j++)
 		{
-			map[i][j].x = (i - steps / 2.0f)/(steps / 2.0f) * scale;
-			map[i][j].z = (j - steps / 2.0f) / (steps / 2.0f) * scale;
-			map[i][j].y = heightMap[i][j] * 0.1;
+			map[i][j].x = (i - steps / 2.0f)/(steps / 2.0f) * TRI_SCALE;
+			map[i][j].z = (j - steps / 2.0f) / (steps / 2.0f) * TRI_SCALE;
+			map[i][j].y = heightMap[i][j] * HEIGHT_SCALE;
 		}
 	}
 	std::vector< std::vector<glm::vec3> > normals(steps + 1, std::vector<glm::vec3>(steps + 1));

@@ -1,14 +1,10 @@
 #pragma once
-#include <iostream>
-#include <random>
-#include <glm/glm.hpp>
+#include "common.h"
 class Triangle {
 public:
 	int x[3];
 	int y[3];
 	glm::vec3 normal;
-	//TODO: RGB
-	//TODO: color
 	Triangle() {};
 	Triangle(int i0, int j0, int i1, int j1, int i2, int j2)
 	{

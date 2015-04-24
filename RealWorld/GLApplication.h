@@ -1,11 +1,6 @@
 #pragma once
-#include <string>
-#include <vector>
-#include <GL/glew.h>
-#include <GL/glfw3.h>
-#include <glm/glm.hpp>
+#include "common.h"
 
-const double PI = 3.1415926535;
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 class GLApplication

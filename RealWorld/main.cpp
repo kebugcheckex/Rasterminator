@@ -16,7 +16,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 int main(int argc, char *argv[])
 {
-	std::string texture_filename("grass.dds");
+	std::string texture_filename("soil.dds");
 	std::string object_filename("car.object");
 	if (argc > 3) texture_filename = argv[2];
 	if (argc > 2) object_filename = argv[1];

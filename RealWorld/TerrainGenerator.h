@@ -24,7 +24,7 @@ public:
 	static void LowPassFilter(int size, double cutoff, int n, std::vector< std::vector<double> >& output);
 	static void Convolution2D(std::vector< std::vector<double> >& data, std::vector< std::vector<double> >& filter, std::vector< std::vector<double> >& output);
 	static void DiamondSquare(std::vector< std::vector<double> >& terrainMap, int level, double terrainR, double roughness);
-
+	static void MultiFractal(std::vector<std::vector<double> >& terrainMap, int xSize, int ySize, double freq = 0.5, double lacunarity = 2.0);
 	static void GenTriangles(std::vector< std::vector<double> >& heightMap,	// Input: height map
 		std::vector<glm::vec3>& vertexList,		// Output: vertex array, each contains x, y, z
 		std::vector<glm::vec3>& normalList,		// Output: normal array

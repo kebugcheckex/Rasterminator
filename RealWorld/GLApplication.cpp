@@ -17,10 +17,10 @@ GLApplication::GLApplication(int xres, int yres)
 
 	camera_pos_ = glm::vec3(CAM_POS);
 	look_at_ = glm::vec3(LOOK_AT);
-	world_up_ = glm::vec3(0.0f, -1.0f, 0.0f);
+	world_up_ = glm::vec3(0.0f, 1.0f, 0.0f);
 	viewmat_ = glm::lookAt(camera_pos_, look_at_, world_up_);
 	projmat_ = glm::perspective(fov_, 4.0f / 3.0f, 0.1f, 100.0f);
-	lightPos_= glm::vec3(LIGHT_POS);
+	lightPos_= glm::vec4(LIGHT_POS);
 }
 
 GLApplication::~GLApplication()
@@ -65,7 +65,7 @@ bool GLApplication::Init()
 	glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	glfwSetKeyCallback(window_, key_callback);
 
-	glClearColor(0.0f, 0.0f, 0.2f, 1.0f);
+	glClearColor(135.0/255.0, 206.0/255.0, 235.0/255.0, 1.0f);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glDepthFunc(GL_LESS);
@@ -261,17 +261,19 @@ void GLApplication::OnKey(int key)
 		break;
 	case GLFW_KEY_W:
 		camera_pos_ += cam_dir * speed;
+		look_at_ += cam_left * speed;
 		break;
 	case GLFW_KEY_S:
 		camera_pos_ -= cam_dir * speed;
+		look_at_ -= cam_left * speed;
 		break;
 	case GLFW_KEY_UP:
-		camera_pos_ += world_up_ * speed;
-		look_at_ += world_up_ * speed;	
+		camera_pos_ -= world_up_ * speed;
+		look_at_ -= world_up_ * speed;	
 		break;
 	case GLFW_KEY_DOWN:
-		camera_pos_ -= world_up_ * speed;
-		look_at_ -= world_up_ * speed;
+		camera_pos_ += world_up_ * speed;
+		look_at_ += world_up_ * speed;
 		break;
 	default:
 		break;
@@ -452,12 +454,15 @@ bool GLApplication::load_terrain()
 	std::vector< std::vector<double> > heightMap;
 #ifdef FFT
 	std::vector< std::vector<double> > random;
-	TerrainGenerator::GaussianRandom(32, random);
+	TerrainGenerator::GaussianRandom(256, random);
 	std::vector< std::vector<double> > filter;
-	TerrainGenerator::LowPassFilter(16, 0.4, 15, filter);
+	TerrainGenerator::LowPassFilter(128, 0.35, 15, filter);
 	TerrainGenerator::Convolution2D(random, filter, heightMap);
+#endif
+#ifdef MULTI
+	TerrainGenerator::MultiFractal(heightMap, 256, 256);
 #else
-	TerrainGenerator::DiamondSquare(heightMap, 9, 30, 0.5);
+	TerrainGenerator::DiamondSquare(heightMap, 8, 50, 0.6);
 #endif
 	
 	TerrainGenerator::GenTriangles(heightMap, vertexList, normalList, uvList);
@@ -567,6 +572,6 @@ void GLApplication::mouse_move()
 	double zy = r * (1 - cos(theta));
 
 	look_at_.z -= zx > zy ? zx : zy;
-	viewmat_ = glm::lookAt(camera_pos_, look_at_, world_up_);
+	viewmat_ = glm::lookAt(camera_pos_, -look_at_, -world_up_);
 	glfwSetCursorPos(window_, xres_ / 2, yres_ / 2);
 }

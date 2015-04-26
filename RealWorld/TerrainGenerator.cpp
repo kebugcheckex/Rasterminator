@@ -1,6 +1,14 @@
 #include "TerrainGenerator.h"
 
+#include <iostream>
+#include <ctime>
+#include <noise/noise.h>
+#include <vector>
 
+#include "noiseutils.h"
+
+using namespace noise;
+using namespace std;
 
 void TerrainGenerator::GaussianRandom(int size, std::vector< std::vector<double> >& output)
 {
@@ -132,6 +140,29 @@ void TerrainGenerator::DiamondSquare(std::vector< std::vector<double> >& terrain
 	}
 }
 
+void TerrainGenerator::MultiFractal(std::vector<std::vector<double> >& terrainMap, int xSize, int ySize, double freq, double lacunarity) {
+
+	module::RidgedMulti myModule;
+	myModule.SetFrequency(freq);
+	myModule.SetLacunarity(2.0);
+	myModule.SetSeed(time(0));
+
+	utils::NoiseMap heightMap;
+	utils::NoiseMapBuilderPlane heightMapBuilder;
+	heightMapBuilder.SetSourceModule(myModule);
+	heightMapBuilder.SetDestNoiseMap(heightMap);
+	heightMapBuilder.SetDestSize(xSize, ySize);
+	heightMapBuilder.SetBounds(2.0, 6.0, 1.0, 5.0);
+	heightMapBuilder.Build();
+
+	terrainMap.resize(xSize, vector<double>(ySize, 0.0));
+	for (int i = 0; i<xSize; i++) {
+		for (int j = 0; j<ySize; j++) {
+			terrainMap[i][j] = heightMap.GetValue(i, j) * 50.0f;
+		}
+	}
+}
+
 void TerrainGenerator::GenTriangles(std::vector< std::vector<double> >& heightMap,	// Input: height map
 	std::vector<glm::vec3>& vertexList,		// Output: vertex array, each contains x, y, z
 	std::vector<glm::vec3>& normalList,		// Output: normal array
@@ -211,4 +242,15 @@ void TerrainGenerator::GenTriangles(std::vector< std::vector<double> >& heightMa
 			counter += 3;
 		}
 	}
+	float s = SKY_VERT / 2;
+	glm::vec3 v0(s, s, s);
+	glm::vec3 v1(s, s, -s);
+	glm::vec3 v2(-s, s, -s);
+	glm::vec3 v3(-s, s, s);
+	glm::vec3 v4(s, -s, s);
+	glm::vec3 v5(s, -s, -s);
+	glm::vec3 v6(-s, -s, -s);
+	glm::vec3 v7(-s, -s, s);
+	
+	std::vector<glm::vec3> sky;
 }

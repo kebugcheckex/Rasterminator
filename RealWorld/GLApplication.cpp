@@ -461,7 +461,9 @@ bool GLApplication::load_terrain()
 #endif
 #ifdef MULTI
 	TerrainGenerator::MultiFractal(heightMap, 256, 256);
-#else
+#endif
+
+#ifdef DIA
 	TerrainGenerator::DiamondSquare(heightMap, 8, 50, 0.6);
 #endif
 	

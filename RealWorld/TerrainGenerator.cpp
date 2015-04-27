@@ -216,41 +216,30 @@ void TerrainGenerator::GenTriangles(std::vector< std::vector<double> >& heightMa
 		{
 			vertexList[counter] = map[i][j];
 			normalList[counter] = glm::normalize(normals[i][j]);
-			textureList[counter].x = rand() / (double)RAND_MAX;
-			textureList[counter].y = rand() / (double)RAND_MAX;
+			textureList[counter].x = (float)i / map.size();
+			textureList[counter].y = (float)j / map.size();
 			vertexList[counter + 1] = map[i + 1][j];
 			normalList[counter + 1] = glm::normalize(normals[i + 1][j]);
-			textureList[counter + 1].x = rand() / (double)RAND_MAX;
-			textureList[counter + 1].y = rand() / (double)RAND_MAX;
+			textureList[counter + 1].x = (float)(i + 1) / map.size();
+			textureList[counter + 1].y = (float)j / map.size();
 			vertexList[counter + 2] = map[i + 1][j + 1];
 			normalList[counter + 2] = glm::normalize(normals[i + 1][j + 1]);
-			textureList[counter + 2].x = rand() / (double)RAND_MAX;
-			textureList[counter + 2].y = rand() / (double)RAND_MAX;
+			textureList[counter + 2].x = (float)(i + 1) / map.size();
+			textureList[counter + 2].y = (float)(j + 1) / map.size();
 			counter += 3;
 			vertexList[counter] = map[i][j];
 			normalList[counter] = glm::normalize(normals[i][j]);
-			textureList[counter].x = rand() / (double)RAND_MAX;
-			textureList[counter].y = rand() / (double)RAND_MAX;
+			textureList[counter].x = (float)i / map.size();
+			textureList[counter].y = (float)j / map.size();
 			vertexList[counter + 1] = map[i + 1][j + 1];
 			normalList[counter + 1] = glm::normalize(normals[i + 1][j + 1]);
-			textureList[counter + 1].x = rand() / (double)RAND_MAX;
-			textureList[counter + 1].y = rand() / (double)RAND_MAX;
+			textureList[counter + 1].x = (float)(i + 1) / map.size();
+			textureList[counter + 1].y = (float)(j + 1) / map.size();
 			vertexList[counter + 2] = map[i][j + 1];
 			normalList[counter + 2] = glm::normalize(normals[i][j + 1]);
-			textureList[counter + 2].x = rand() / (double)RAND_MAX;
-			textureList[counter + 2].y = rand() / (double)RAND_MAX;
+			textureList[counter + 2].x = (float)i / map.size();
+			textureList[counter + 2].y = (float)(j + 1) / map.size();
 			counter += 3;
 		}
 	}
-	float s = SKY_VERT / 2;
-	glm::vec3 v0(s, s, s);
-	glm::vec3 v1(s, s, -s);
-	glm::vec3 v2(-s, s, -s);
-	glm::vec3 v3(-s, s, s);
-	glm::vec3 v4(s, -s, s);
-	glm::vec3 v5(s, -s, -s);
-	glm::vec3 v6(-s, -s, -s);
-	glm::vec3 v7(-s, -s, s);
-	
-	std::vector<glm::vec3> sky;
 }

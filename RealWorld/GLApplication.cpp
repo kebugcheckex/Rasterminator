@@ -21,6 +21,8 @@ GLApplication::GLApplication(int xres, int yres)
 	viewmat_ = glm::lookAt(camera_pos_, look_at_, world_up_);
 	projmat_ = glm::perspective(fov_, 4.0f / 3.0f, 0.1f, 100.0f);
 	lightPos_= glm::vec4(LIGHT_POS);
+
+	has_focus = true;
 }
 
 GLApplication::~GLApplication()
@@ -157,6 +159,7 @@ bool GLApplication::LoadObject(const char *filename)
 void GLApplication::RunRender()
 {
 	std::cout << "Begin render!\n";
+	glfwSetCursorPos(window_, xres_ / 2, yres_ / 2);
 	while (!glfwWindowShouldClose(window_))
 	{
 		RenderLoop();
@@ -245,9 +248,12 @@ void GLApplication::RenderLoop()
 void GLApplication::OnKey(int key)
 {
 	const float speed = 0.4f;
+	static int press_count = 0;
 	glm::vec3 cam_dir = look_at_ - camera_pos_;
+	glm::vec3 rev_cam_dir = -look_at_ - camera_pos_;
+	rev_cam_dir = glm::normalize(rev_cam_dir);
 	cam_dir = glm::normalize(cam_dir);
-	glm::vec3 cam_left = glm::cross(world_up_, cam_dir);
+	glm::vec3 cam_left = glm::cross(world_up_, rev_cam_dir);
 	cam_left = glm::normalize(cam_left);
 	switch (key)
 	{
@@ -260,20 +266,22 @@ void GLApplication::OnKey(int key)
 		look_at_ -= cam_left * speed;
 		break;
 	case GLFW_KEY_W:
-		camera_pos_ += cam_dir * speed;
-		look_at_ += cam_left * speed;
+		camera_pos_ += rev_cam_dir * speed;
 		break;
 	case GLFW_KEY_S:
-		camera_pos_ -= cam_dir * speed;
-		look_at_ -= cam_left * speed;
+		camera_pos_ -= rev_cam_dir * speed;
 		break;
 	case GLFW_KEY_UP:
-		camera_pos_ -= world_up_ * speed;
-		look_at_ -= world_up_ * speed;	
-		break;
-	case GLFW_KEY_DOWN:
 		camera_pos_ += world_up_ * speed;
 		look_at_ += world_up_ * speed;
+		break;
+	case GLFW_KEY_DOWN:
+		camera_pos_ -= world_up_ * speed;
+		look_at_ -= world_up_ * speed;
+		break;
+	case GLFW_KEY_C:
+		press_count++;
+		if (press_count % 2 == 0) has_focus = !has_focus;
 		break;
 	default:
 		break;
@@ -464,7 +472,7 @@ bool GLApplication::load_terrain()
 #endif
 
 #ifdef DIA
-	TerrainGenerator::DiamondSquare(heightMap, 8, 50, 0.6);
+	TerrainGenerator::DiamondSquare(heightMap, 8, 80, 0.45);
 #endif
 	
 	TerrainGenerator::GenTriangles(heightMap, vertexList, normalList, uvList);
@@ -555,6 +563,7 @@ GLuint GLApplication::load_dds(const char *filename)
 */
 void GLApplication::mouse_move()
 {
+	if (!has_focus) return;
 	double cx = xres_ / 2;
 	double cy = yres_ / 2;
 	double cx_now, cy_now;

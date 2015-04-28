@@ -19,7 +19,7 @@ void main(){
 
 	// Light emission properties
 	vec3 LightColor = vec3(1,1,1);
-	float LightPower = 120.0f;
+	float LightPower = 80.0f;
 	
 	// Material properties
 	vec3 MaterialDiffuseColor = texture2D( myTextureSampler, UV ).rgb;
@@ -27,7 +27,7 @@ void main(){
 	vec3 MaterialSpecularColor = vec3(0.1,0.1,0.1);
 
 	// Distance to the light
-	float distance = length(LightPosition_worldspace - Position_worldspace) * 0.5;
+	float distance = length(LightPosition_worldspace - Position_worldspace) * 0.7;
 
 	// Normal of the computed fragment, in camera space
 	vec3 n = normalize( Normal_cameraspace );

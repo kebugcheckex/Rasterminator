@@ -214,31 +214,33 @@ void TerrainGenerator::GenTriangles(std::vector< std::vector<double> >& heightMa
 	{
 		for (int j = 0; j < map.size() - 1; j++)
 		{
+			int s = map.size() / 10;
+			float r = 0.0; //(float)rand() / RAND_MAX * 0.25;
 			vertexList[counter] = map[i][j];
 			normalList[counter] = glm::normalize(normals[i][j]);
-			textureList[counter].x = (float)i / map.size();
-			textureList[counter].y = (float)j / map.size();
+			textureList[counter].x = (float)(i % s) / map.size() + r;
+			textureList[counter].y = (float)(j % s) / map.size() + r;
 			vertexList[counter + 1] = map[i + 1][j];
 			normalList[counter + 1] = glm::normalize(normals[i + 1][j]);
-			textureList[counter + 1].x = (float)(i + 1) / map.size();
-			textureList[counter + 1].y = (float)j / map.size();
+			textureList[counter + 1].x = (float)((i + 1) % s) / map.size() + r;
+			textureList[counter + 1].y = (float)(j % s) / map.size() + r;
 			vertexList[counter + 2] = map[i + 1][j + 1];
 			normalList[counter + 2] = glm::normalize(normals[i + 1][j + 1]);
-			textureList[counter + 2].x = (float)(i + 1) / map.size();
-			textureList[counter + 2].y = (float)(j + 1) / map.size();
+			textureList[counter + 2].x = (float)((i + 1) % s) / map.size() + r;
+			textureList[counter + 2].y = (float)((j + 1) % s) / map.size() + r;
 			counter += 3;
 			vertexList[counter] = map[i][j];
 			normalList[counter] = glm::normalize(normals[i][j]);
-			textureList[counter].x = (float)i / map.size();
-			textureList[counter].y = (float)j / map.size();
+			textureList[counter].x = (float)(i % s) / map.size() + r;
+			textureList[counter].y = (float)(j % s) / map.size() + r;
 			vertexList[counter + 1] = map[i + 1][j + 1];
 			normalList[counter + 1] = glm::normalize(normals[i + 1][j + 1]);
-			textureList[counter + 1].x = (float)(i + 1) / map.size();
-			textureList[counter + 1].y = (float)(j + 1) / map.size();
+			textureList[counter + 1].x = (float)((i + 1) % s) / map.size() + r;
+			textureList[counter + 1].y = (float)((j + 1) % s) / map.size() + r;
 			vertexList[counter + 2] = map[i][j + 1];
 			normalList[counter + 2] = glm::normalize(normals[i][j + 1]);
-			textureList[counter + 2].x = (float)i / map.size();
-			textureList[counter + 2].y = (float)(j + 1) / map.size();
+			textureList[counter + 2].x = (float)((i + 1) % s) / map.size() + r;
+			textureList[counter + 2].y = (float)((j + 1) % s) / map.size() + r;
 			counter += 3;
 		}
 	}

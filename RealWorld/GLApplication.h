@@ -55,5 +55,6 @@ protected:
 	bool load_terrain();
 	GLuint load_dds(const char *filename);
 	void mouse_move();
+	bool has_focus;
 };
 
